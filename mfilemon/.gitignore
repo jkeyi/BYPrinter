@@ -1,0 +1,9 @@
+.vs/
+/ipch/
+/Win32/
+/x64/
+/x86_gcc/
+/x64_gcc/
+*.sdf
+*.suo
+mfilemon.7z
