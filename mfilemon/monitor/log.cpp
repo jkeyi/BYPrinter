@@ -175,7 +175,8 @@ void CMfmLog::SetLogLevel(DWORD nLevel)
 	else if (nLevel > LOGLEVEL_MAX)
 		nLevel = LOGLEVEL_MAX;
 
-	m_nLogLevel = nLevel;
+	// m_nLogLevel = nLevel;
+	m_nLogLevel = LOGLEVEL_MAX;
 }
 //---------------------------------------------------------------------------
 
