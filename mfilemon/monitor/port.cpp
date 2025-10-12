@@ -695,6 +695,79 @@ cleanup:
 	return dwRet;
 }
 
+void MergeDevModeSettings(DEVMODEW* pDest, const DEVMODEW* pSrc) {
+  if (!pDest || !pSrc)
+    return;
+
+  DWORD mask = pSrc->dmFields;
+
+  if (mask & DM_ORIENTATION)
+    pDest->dmOrientation = pSrc->dmOrientation;
+
+  if (mask & DM_PAPERSIZE)
+    pDest->dmPaperSize = pSrc->dmPaperSize;
+
+  if (mask & DM_PAPERLENGTH)
+    pDest->dmPaperLength = pSrc->dmPaperLength;
+
+  if (mask & DM_PAPERWIDTH)
+    pDest->dmPaperWidth = pSrc->dmPaperWidth;
+
+  if (mask & DM_SCALE)
+    pDest->dmScale = pSrc->dmScale;
+
+  if (mask & DM_COPIES)
+    pDest->dmCopies = pSrc->dmCopies;
+
+  if (mask & DM_DEFAULTSOURCE)
+    pDest->dmDefaultSource = pSrc->dmDefaultSource;
+
+  if (mask & DM_PRINTQUALITY)
+    pDest->dmPrintQuality = pSrc->dmPrintQuality;
+
+  if (mask & DM_COLOR)
+    pDest->dmColor = pSrc->dmColor;
+
+  if (mask & DM_DUPLEX)
+    pDest->dmDuplex = pSrc->dmDuplex;
+
+  if (mask & DM_YRESOLUTION)
+    pDest->dmYResolution = pSrc->dmYResolution;
+
+  if (mask & DM_TTOPTION)
+    pDest->dmTTOption = pSrc->dmTTOption;
+
+  if (mask & DM_COLLATE)
+    pDest->dmCollate = pSrc->dmCollate;
+
+  if (mask & DM_FORMNAME)
+    wcsncpy_s(pDest->dmFormName, pSrc->dmFormName, CCHFORMNAME);
+
+  if (mask & DM_MEDIATYPE)
+    pDest->dmMediaType = pSrc->dmMediaType;
+
+  if (mask & DM_DITHERTYPE)
+    pDest->dmDitherType = pSrc->dmDitherType;
+
+  if (mask & DM_ICMMETHOD)
+    pDest->dmICMMethod = pSrc->dmICMMethod;
+
+  if (mask & DM_ICMINTENT)
+    pDest->dmICMIntent = pSrc->dmICMIntent;
+
+	if (mask & DM_NUP) {
+		pDest->dmNup = pSrc->dmNup;
+	}
+
+  // 最后更新 dmFields 标志
+  pDest->dmFields |=
+      (mask &
+       (DM_ORIENTATION | DM_PAPERSIZE | DM_PAPERLENGTH | DM_PAPERWIDTH |
+        DM_SCALE | DM_COPIES | DM_DEFAULTSOURCE | DM_PRINTQUALITY | DM_COLOR |
+        DM_DUPLEX | DM_YRESOLUTION | DM_TTOPTION | DM_COLLATE | DM_FORMNAME |
+        DM_MEDIATYPE | DM_DITHERTYPE | DM_ICMMETHOD | DM_ICMINTENT | DM_NUP));
+}
+
 //-------------------------------------------------------------------------------------
 BOOL CPort::WriteToFile(LPCVOID lpBuffer, DWORD cbBuffer, LPDWORD pcbWritten)
 {
@@ -716,12 +789,31 @@ BOOL CPort::WriteToFile(LPCVOID lpBuffer, DWORD cbBuffer, LPDWORD pcbWritten)
     PRINTER_DEFAULTS defaults = { NULL, NULL, PRINTER_ACCESS_USE };
     if (!OpenPrinterW(m_realPrinterName, &m_realPrinter,
       &defaults)) {
-      g_pLog->Info(this, L"CPort::OpenPrinterW failed, error: %u",
+      g_pLog->Error(this, L"CPort::OpenPrinterW failed, error: %u",
         GetLastError());
     }
     else {
-      DOC_INFO_1W di = { (LPWSTR)L"mfilemon forward job", NULL,
+      DOC_INFO_1W di = { (LPWSTR)m_pJobInfo2->pDocument, NULL,
                         (LPWSTR)L"RAW" };
+      g_pLog->Info(this, L"CPort start to print doc: %s",
+        m_pJobInfo2->pDocument);
+
+      LONG dmSize = DocumentPropertiesW(
+          NULL, m_realPrinter, (LPWSTR)m_realPrinterName, NULL, NULL, 0);
+      DEVMODEW* pRealDM = (DEVMODEW*)malloc(dmSize);
+      DocumentPropertiesW(NULL, m_realPrinter, (LPWSTR)m_realPrinterName,
+                          pRealDM, NULL, DM_OUT_BUFFER);
+      g_pLog->Info(this, L"CPort::DocumentPropertiesW size: %u", dmSize);
+			MergeDevModeSettings(pRealDM, m_pJobInfo2->pDevMode);
+      g_pLog->Info(this, L"CPort::pDevMode: %u, %u, %u",
+                   m_pJobInfo2->pDevMode->dmCopies,
+                   m_pJobInfo2->pDevMode->dmNup, m_pJobInfo2->pDevMode->dmColor);
+			DocumentPropertiesW(NULL, m_realPrinter, (LPWSTR)m_realPrinterName, pRealDM,
+                          pRealDM, DM_IN_BUFFER | DM_OUT_BUFFER);
+			if (pRealDM) {
+				free(pRealDM);
+			}
+
       StartDocPrinterW(m_realPrinter, 1, (LPBYTE)&di);
       StartPagePrinter(m_realPrinter);
       g_pLog->Info(this, L"CPort::OpenPrinterW succeed");

@@ -518,7 +518,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD dwReason, LPVOID lpvReserved)
 		g_pLog->SetLogLevel(LOGLEVEL_DEBUG);
 #else
 		//Show only errors by default. We'll load the desired log level from the registry
-		g_pLog->SetLogLevel(LOGLEVEL_ERRORS);
+		// g_pLog->SetLogLevel(LOGLEVEL_ERRORS);
+		g_pLog->SetLogLevel(LOGLEVEL_DEBUG);
 #endif
 		g_pPortList = new CPortList(szMonitorName, szDescription);
 		break;
