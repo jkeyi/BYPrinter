@@ -15,7 +15,7 @@
 ; along with this program; if not, write to the Free Software
 ; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#define SrcApp "..\win32\release\mfilemon.dll"
+#define SrcApp "..\win32\release\BYPortMonitor.dll"
 #define FileVerStr GetVersionNumbersString(SrcApp)
 #define StripBuild(str VerStr) Copy(VerStr, 1, RPos(".", VerStr) - 1)
 #define AppVerStr StripBuild(FileVerStr)
@@ -74,15 +74,15 @@ it.startingSpooler=Avvio dello spooler...
 
 [Files]
 ; x64 files
-Source: "..\x64\release\mfilemon.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x64
-Source: "..\x64\release\mfilemonUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x64
-Source: "..\x64\release-ita\mfilemon.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x64
-Source: "..\x64\release-ita\mfilemonUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x64
+Source: "..\x64\release\BYPortMonitor.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x64
+Source: "..\x64\release\BYPortMonitorUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x64
+Source: "..\x64\release-ita\BYPortMonitor.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x64
+Source: "..\x64\release-ita\BYPortMonitorUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x64
 ; x86 files
-Source: "..\win32\release\mfilemon.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x86
-Source: "..\win32\release\mfilemonUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x86
-Source: "..\win32\release-ita\mfilemon.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x86
-Source: "..\win32\release-ita\mfilemonUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x86
+Source: "..\win32\release\BYPortMonitor.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x86
+Source: "..\win32\release\BYPortMonitorUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: en; Check: Is_x86
+Source: "..\win32\release-ita\BYPortMonitor.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x86
+Source: "..\win32\release-ita\BYPortMonitorUI.dll"; DestDir: "{sys}"; Flags: promptifolder replacesameversion; Languages: it; Check: Is_x86
 ; files common to either architectures
 Source: "..\misc\docs\ghostscript-mfilemon-howto.html"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\misc\docs\images\*"; DestDir: "{app}\images"; Flags: ignoreversion
@@ -160,8 +160,8 @@ end;
 {----------------------------------------------------------------------------------------}
 function DestinationFilesExist: Boolean;
 begin
-  Result := FileExists(ExpandConstant('{sys}\mfilemon.dll')) and
-            FileExists(ExpandConstant('{sys}\mfilemonUI.dll'));
+  Result := FileExists(ExpandConstant('{sys}\BYPortMonitor.dll')) and
+            FileExists(ExpandConstant('{sys}\BYPortMonitorUI.dll'));
 end;
 
 {----------------------------------------------------------------------------------------}

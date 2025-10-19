@@ -122,14 +122,14 @@ BEGIN
     BEGIN
       VALUE "Comments", szComments
       VALUE "CompanyName", "Lorenzo Monti\0"
-      VALUE "FileDescription", "Multi file port monitor UI\0"
+      VALUE "FileDescription", "BYPortMonitorUI\0"
       VALUE "FileVersion", szVersion
-      VALUE "InternalName", "MFILEMONUI\0"
-      VALUE "LegalCopyright", "Copyright © 2007-2023 Lorenzo Monti\0"
+      VALUE "InternalName", "BYPortMonitorUI\0"
+      VALUE "LegalCopyright", "Copyright ?2007-2023 Lorenzo Monti\0"
       VALUE "LegalTrademarks", "\0"
-      VALUE "OriginalFilename", "MFILEMONUI.DLL\0"
+      VALUE "OriginalFilename", "BYPortMonitorUI.DLL\0"
       VALUE "PrivateBuild", "\0"
-      VALUE "ProductName", "MFILEMON\0"
+      VALUE "ProductName", "BYPortMonitor\0"
       VALUE "ProductVersion", szVersion
       VALUE "SpecialBuild", "\0"
     END

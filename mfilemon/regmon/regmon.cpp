@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "stdafx.h"
 
-static const LPCWSTR pMonitorName = (LPWSTR)L"Multi File Port Monitor";
+static const LPCWSTR pMonitorName = (LPWSTR)L"BYPortMonitor";
 
 static LPCTSTR szGPL =
     _T("MFILEMON - print to file with automatic filename assignment\n")
@@ -94,24 +94,24 @@ int _tmain(int argc, _TCHAR* argv[]) {
   LPTSTR szAction = NULL;
   int ret;
 
-  minfo.pName = (LPWSTR) _T("Multi File Port Monitor");
+  minfo.pName = (LPWSTR) _T("BYPortMonitor");
   minfo.pEnvironment = NULL;
-  minfo.pDLLName = (LPWSTR) _T("mfilemon.dll");
+  minfo.pDLLName = (LPWSTR) _T("BYPortMonitor.dll");
 
   if (argc > 1 && _tcsicmp(argv[1], _T("-r")) == 0) {
     // COPY FILE TO system
     TCHAR appDir[MAX_PATH] = _T("\0");
     GetModuleFileName(NULL, appDir, MAX_PATH);
     *_tcsrchr(appDir, _TCHAR('\\')) = _TCHAR('\0');
-    std::wstring dllPath = std::wstring(appDir) + L"\\mfilemon.dll";
+    std::wstring dllPath = std::wstring(appDir) + L"\\BYPortMonitor.dll";
     std::wstring dstPath =
-        std::wstring(L"C:\\Windows\\System32") + L"\\mfilemon.dll";
+        std::wstring(L"C:\\Windows\\System32") + L"\\BYPortMonitor.dll";
     szAction = (LPWSTR)_T("CopyFile To System32");
     ret = CopyFile(dllPath.c_str(), dstPath.c_str(), FALSE);
     if (ret) {
-      dllPath = std::wstring(appDir) + L"\\mfilemonUI.dll";
+      dllPath = std::wstring(appDir) + L"\\BYPortMonitorUI.dll";
       dstPath =
-          std::wstring(L"C:\\Windows\\System32") + L"\\mfilemonUI.dll";
+          std::wstring(L"C:\\Windows\\System32") + L"\\BYPortMonitorUI.dll";
       ret = CopyFile(dllPath.c_str(), dstPath.c_str(), FALSE);
       if (ret) {
         szAction = (LPWSTR) _T("AddMonitor");
@@ -134,9 +134,9 @@ int _tmain(int argc, _TCHAR* argv[]) {
     if (FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
                           FORMAT_MESSAGE_FROM_SYSTEM |
                           FORMAT_MESSAGE_IGNORE_INSERTS,
-                      NULL, dwErr, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                      NULL, dwErr, MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
                       reinterpret_cast<LPTSTR>(&pMsgBuf), 0, NULL)) {
-      _tprintf(_T("The following error occurred:\n0x%08x\n%s\n"), dwErr,
+      _tprintf(_T("The following error occurred:\n%d\n%s\n"), dwErr,
                pMsgBuf);
       LocalFree(pMsgBuf);
     }

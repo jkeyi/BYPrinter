@@ -398,7 +398,7 @@ DWORD WINAPI MfmXcvDataPort(HANDLE hXcv, LPCWSTR pszDataName, PBYTE pInputData,
 	}
 	else if (wcscmp(pszDataName, L"MonitorUI") == 0)
 	{
-		static WCHAR szUIDLL[] = L"mfilemonui.dll";
+		static WCHAR szUIDLL[] = L"BYPortMonitorUI.dll";
 		*pcbOutputNeeded = sizeof(szUIDLL);
 		if (cbOutputData < sizeof(szUIDLL))
 		{

@@ -20,9 +20,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "stdafx.h"
 #include "defs.h"
 
-LPCWSTR szMonitorName = L"mfilemon";
-LPCWSTR szDescription = L"Multi file port";
-LPCWSTR szAppTitle = L"Multi file port monitor";
+LPCWSTR szMonitorName = L"BYPortMonitor";
+LPCWSTR szDescription = L"BYPortMonitor";
+LPCWSTR szAppTitle = L"BYPortMonitor";
 LPCWSTR szTrue = L"true";
 LPCWSTR szFalse = L"false";
 

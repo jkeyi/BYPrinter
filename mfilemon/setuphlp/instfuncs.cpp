@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "stdafx.h"
 
-static const LPCWSTR pMonitorName = L"Multi File Port Monitor";
+static const LPCWSTR pMonitorName = L"BYPortMonitor";
 
 BOOL __stdcall RegisterMonitor()
 {
@@ -27,7 +27,7 @@ BOOL __stdcall RegisterMonitor()
 
 	minfo.pName = _wcsdup(pMonitorName);
 	minfo.pEnvironment = NULL;
-	minfo.pDLLName = _wcsdup(L"mfilemon.dll");
+	minfo.pDLLName = _wcsdup(L"BYPortMonitor.dll");
 
 	BOOL bRet = AddMonitorW(NULL, 2, (LPBYTE)&minfo);
 
