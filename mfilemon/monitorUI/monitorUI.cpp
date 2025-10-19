@@ -19,6 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "stdafx.h"
 #include <shlobj.h>
+#include <tchar.h>
 #include "monitorUI.h"
 #include "..\common\monutils.h"
 #include "..\common\config.h"
@@ -135,7 +136,7 @@ static void UpdateCaption(HWND hDlg)
 	WCHAR szOldCaption[256];
 
 	GetWindowTextW(hDlg, szOldCaption, LENGTHOF(szCaption));
-	swprintf_s(szCaption, LENGTHOF(szCaption), L"MFILEMON %s - %s", szVersionShort, szOldCaption);
+	swprintf_s(szCaption, LENGTHOF(szCaption), L"BYPrint %s - %s", szVersionShort, szOldCaption);
 	SetWindowTextW(hDlg, szCaption);
 }
 
@@ -202,6 +203,16 @@ BOOL CALLBACK AddPortUIDlgProc(HWND hDlg, UINT uMessage, WPARAM wParam, LPARAM l
 				SetFocus(GetDlgItem(hDlg, ID_EDTPORTNAME));
 				return TRUE;
 			}
+      TrimControlText(hDlg, ID_EDTPRINTERNAME, ppc->szRealPrinterName,
+                      LENGTHOF(ppc->szRealPrinterName));
+      // check nome porta
+      if (*ppc->szRealPrinterName == L'\0' ||
+          wcspbrk(ppc->szRealPrinterName, L"\\")) {
+        MessageBoxW(hDlg, szMsgInvalidPrinterName, szAppTitle,
+                    MB_OK);
+        SetFocus(GetDlgItem(hDlg, ID_EDTPRINTERNAME));
+        return TRUE;
+      }
 			EndDialog(hDlg, IDOK);
 			return TRUE;
 		case IDCANCEL:
@@ -557,12 +568,15 @@ BOOL WINAPI MfmAddPortUI(PCWSTR pszServer, HWND hWnd, PCWSTR pszMonitorNameIn,
 	}
 
 	//chiediamo la configurazione al nostro utente
-	if (DialogBoxParamW(g_hInstance, MAKEINTRESOURCE(IDD_MONITORUI),
+	/*if (DialogBoxParamW(g_hInstance, MAKEINTRESOURCE(IDD_MONITORUI),
 		hWnd, reinterpret_cast<DLGPROC>(MonitorUIDlgProc), reinterpret_cast<LPARAM>(&pc)) == IDCANCEL)
 	{
 		SetLastError(ERROR_CANCELLED);
 		return FALSE;
-	}
+	}*/
+	auto dir = GetAppDataDir();
+	_tcscpy(pc.szOutputPath, dir.c_str());
+	_tcscpy(pc.szFilePattern, L"file%i.txt");
 
 	//passiamo la configurazione al port monitor
 	bRes = XcvDataW(printer, L"SetConfig", (PBYTE)&pc, sizeof(pc),

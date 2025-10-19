@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 typedef struct tagPORTCONFIG
 {
 	WCHAR szPortName[MAX_PATH + 1];
+	WCHAR szRealPrinterName[MAX_PATH + 1];
 	WCHAR szOutputPath[MAX_PATH + 1];
 	WCHAR szFilePattern[MAX_PATH + 1];
 	BOOL bOverwrite;

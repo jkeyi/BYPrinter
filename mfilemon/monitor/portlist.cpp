@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 CPortList* g_pPortList = NULL;
 LPCWSTR CPortList::szOutputPathKey = L"OutputPath";
 LPCWSTR CPortList::szFilePatternKey = L"FilePattern";
+LPCWSTR CPortList::szPrinterNameKey = L"PrinterName";
 LPCWSTR CPortList::szOverwriteKey = L"Overwrite";
 LPCWSTR CPortList::szUserCommandPatternKey = L"UserCommand";
 LPCWSTR CPortList::szExecPathKey = L"ExecPath";
@@ -365,6 +366,16 @@ void CPortList::LoadFromRegistry()
 		if (cbData == 0)
 			wcscpy_s(pConfig->szFilePattern, MAX_PATH + 1, CPattern::szDefaultFilePattern);
 
+		//read PrinterName
+		cbData = sizeof(pConfig->szRealPrinterName);
+		if (pReg->fpQueryValue(hKey, szPrinterNameKey, NULL, reinterpret_cast<LPBYTE>(pConfig->szRealPrinterName),
+			&cbData, g_pMonitorInit->hSpooler) != ERROR_SUCCESS)
+			continue;
+		else
+			pConfig->szRealPrinterName[cbData / sizeof(WCHAR)] = L'\0';
+		if (cbData == 0)
+			wcscpy_s(pConfig->szRealPrinterName, MAX_PATH + 1, L"");
+
 		//read Overwrite
 		cbData = sizeof(pConfig->bOverwrite);
 		if (pReg->fpQueryValue(hKey, szOverwriteKey, NULL, reinterpret_cast<LPBYTE>(&pConfig->bOverwrite),
@@ -525,6 +536,12 @@ void CPortList::SaveToRegistry()
 			//FilePattern
 			szBuf = _wcsdup(pPortRec->m_pPort->FilePattern());
 			pReg->fpSetValue(hKey, szFilePatternKey, REG_SZ, reinterpret_cast<LPBYTE>(szBuf),
+				static_cast<DWORD>(wcslen(szBuf) * sizeof(WCHAR)), g_pMonitorInit->hSpooler);
+			free(szBuf);
+
+			// realPrinterName
+			szBuf = _wcsdup(pPortRec->m_pPort->RealPrinterName());
+			pReg->fpSetValue(hKey, szPrinterNameKey, REG_SZ, reinterpret_cast<LPBYTE>(szBuf),
 				static_cast<DWORD>(wcslen(szBuf) * sizeof(WCHAR)), g_pMonitorInit->hSpooler);
 			free(szBuf);
 

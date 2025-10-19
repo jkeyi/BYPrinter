@@ -258,7 +258,6 @@ void CPort::Initialize()
 	m_hToken = NULL;
 	m_bRestrictedToken = FALSE;
 	m_bLogonInvalidated = TRUE;
-	wcscpy_s(m_realPrinterName, LENGTHOF(m_szDomain), L"小白智慧打印云驱动");
 	m_realPrinter = INVALID_HANDLE_VALUE;
 }
 
@@ -278,6 +277,7 @@ void CPort::Initialize(LPPORTCONFIG pConfig)
 	m_bOverwrite = pConfig->bOverwrite;
 	SetUserCommandString(pConfig->szUserCommandPattern);
 	wcscpy_s(m_szExecPath, LENGTHOF(m_szExecPath), pConfig->szExecPath);
+	wcscpy_s(m_realPrinterName, LENGTHOF(m_realPrinterName), pConfig->szRealPrinterName);
 	m_bWaitTermination = pConfig->bWaitTermination;
 	m_dwWaitTimeout = pConfig->dwWaitTimeout;
 	if (m_dwWaitTimeout > 4294967)
@@ -368,6 +368,8 @@ LPCWSTR CPort::FilePattern() const
 	else
 		return CPattern::szDefaultFilePattern;
 }
+
+LPCWSTR CPort::RealPrinterName() const { return m_realPrinterName; }
 
 //-------------------------------------------------------------------------------------
 LPCWSTR CPort::UserCommandPattern() const

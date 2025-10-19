@@ -19,6 +19,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #pragma once
 
+#include <string>
+
 #define ISSLASH(a) ((a) == L'\\')
 
 BOOL FileExists(LPCWSTR szFileName);
@@ -32,3 +34,5 @@ void Trim(LPWSTR szString);
 void GetFileParent(LPCWSTR szFile, LPWSTR szParent, size_t count);
 
 BOOL IsUACEnabled();
+
+std::wstring GetAppDataDir();

@@ -40,6 +40,7 @@ extern LPCWSTR szFalse;
 
 #ifdef MFILEMONUI
 extern LPCWSTR szMsgInvalidPortName;
+extern LPCWSTR szMsgInvalidPrinterName;
 extern LPCWSTR szMsgBrowseFolderTitle;
 extern LPCWSTR szMsgProvideFileName;
 extern LPCWSTR szMsgInvalidFileName;

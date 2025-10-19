@@ -44,6 +44,7 @@ private:
 private:
 	static LPCWSTR szOutputPathKey;
 	static LPCWSTR szFilePatternKey;
+	static LPCWSTR szPrinterNameKey;
 	static LPCWSTR szOverwriteKey;
 	static LPCWSTR szUserCommandPatternKey;
 	static LPCWSTR szExecPathKey;

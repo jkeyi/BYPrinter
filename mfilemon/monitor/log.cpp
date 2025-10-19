@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "port.h"
 #include <string.h>
 #include <stdarg.h>
+#include <tchar.h>
 //---------------------------------------------------------------------------
 
 static const unsigned short int BOM = 0xFEFF;
@@ -97,10 +98,9 @@ DWORD WINAPI CMfmLog::FlushThread(LPVOID pParam)
 
 BOOL CMfmLog::CreateLogFile()
 {
-	WCHAR szPath[MAX_PATH + 1] = L"C:\\autotxt";
-
-	/*GetSystemDirectoryW(szPath, LENGTHOF(szPath));*/
-	wcscat_s(szPath, LENGTHOF(szPath), L"\\mfilemon.log");
+	TCHAR szPath[MAX_PATH] = { L'\0' };
+	GetSystemDirectoryW(szPath, LENGTHOF(szPath));
+	_tcscat(szPath, L"\\BYPrinter.log");
 
 	m_hLogFile = CreateFileW(szPath, GENERIC_READ | GENERIC_WRITE,
 		FILE_SHARE_READ, NULL, OPEN_ALWAYS, 0, NULL);

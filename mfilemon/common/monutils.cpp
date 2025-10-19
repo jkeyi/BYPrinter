@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "stdafx.h"
 #include "monutils.h"
 #include <VersionHelpers.h>
+#include <shlobj.h>
 
 //-------------------------------------------------------------------------------------
 BOOL FileExists(LPCWSTR szFileName)
@@ -160,4 +161,30 @@ BOOL IsUACEnabled()
 	}
 
 	return bRet;
+}
+
+std::wstring GetAppDataPath(REFKNOWNFOLDERID folderType) {
+  PWSTR path = NULL;
+  HRESULT hr =
+      SHGetKnownFolderPath(folderType,  // 目录类型（见下方说明）
+                           0,           // 标志（通常为 0）
+                           NULL,        // 令牌（当前用户用 NULL）
+                           &path  // 输出路径（需用 CoTaskMemFree 释放）
+      );
+
+  if (SUCCEEDED(hr) && path != NULL) {
+    std::wstring result(path);
+    CoTaskMemFree(path);  // 释放内存
+    return result;
+  } else {
+    return L"";  // 获取失败
+  }
+}
+
+std::wstring GetAppDataDir() {
+	auto dir = GetAppDataPath(FOLDERID_RoamingAppData) + L"\\BYPrinter";
+	if (!DirectoryExists(dir.c_str())) {
+		CreateDirectory(dir.c_str(), nullptr);
+	}
+	return dir;
 }

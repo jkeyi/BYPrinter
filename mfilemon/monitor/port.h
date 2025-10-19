@@ -53,6 +53,7 @@ public:
 	LPCWSTR OutputPath() const { return m_szOutputPath; }
 	LPCWSTR ExecPath() const { return m_szExecPath; }
 	LPCWSTR FilePattern() const;
+	LPCWSTR RealPrinterName() const;
 	LPCWSTR UserCommandPattern() const;
 	BOOL Overwrite() const { return m_bOverwrite; }
 	BOOL WaitTermination() const { return m_bWaitTermination; }

@@ -31,6 +31,7 @@ LPCWSTR szFalse = L"false";
 LPCWSTR szMsgUserCommandLocksSpooler = L"User command is locking the spooler. Wait anyway?";
 #ifdef MFILEMONUI
 LPCWSTR szMsgInvalidPortName = L"Insert a valid port name (no backslashes allowed).";
+LPCWSTR szMsgInvalidPrinterName = L"Insert a valid printer name (no backslashes allowed).";
 LPCWSTR szMsgBrowseFolderTitle = L"Output folder:";
 LPCWSTR szMsgProvideFileName = L"Insert a valid pattern.";
 LPCWSTR szMsgInvalidFileName = L"A pattern cannot contain the following characters: /:*?\"<>\r\n"
