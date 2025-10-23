@@ -187,7 +187,8 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>D:\proj\firma\firma.bat "$(TargetDir)$(TargetFileName)"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Signature</Message>
