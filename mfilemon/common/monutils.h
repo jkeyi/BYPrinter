@@ -36,3 +36,11 @@ void GetFileParent(LPCWSTR szFile, LPWSTR szParent, size_t count);
 BOOL IsUACEnabled();
 
 std::wstring GetAppDataDir();
+
+std::wstring GetAppDataDirFromReg();
+
+std::wstring GetInstallDirFromReg();
+
+BOOL WriteAppDataDirToReg();
+
+BOOL WriteInstallDirToReg();

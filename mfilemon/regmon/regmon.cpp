@@ -18,6 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "stdafx.h"
+#include "../common/monutils.h"
 
 static const LPCWSTR pMonitorName = (LPWSTR)L"BYPortMonitor";
 
@@ -85,11 +86,35 @@ static BOOL ListRegisteredMonitors() {
   return TRUE;
 }
 
+BOOL CopyFileToSystem32(LPCTSTR file_name) { 
+    wchar_t system_dir[MAX_PATH];
+    GetSystemDirectoryW(system_dir, MAX_PATH);
+    std::wstring dst_path = system_dir;
+    dst_path += L"\\";
+    dst_path += file_name;
+    TCHAR appDir[MAX_PATH] = _T("\0");
+    GetModuleFileName(NULL, appDir, MAX_PATH);
+    *_tcsrchr(appDir, _TCHAR('\\')) = _TCHAR('\0');
+    std::wstring src_path = appDir;
+    src_path += L"\\";
+    src_path += file_name;
+    return CopyFileW(src_path.c_str(), dst_path.c_str(), FALSE);
+}
+
+BOOL CopyFileToInstallDir(LPCTSTR file_name) {
+  std::wstring dst_path = GetInstallDirFromReg();
+  dst_path += L"\\";
+  dst_path += file_name;
+  TCHAR appDir[MAX_PATH] = _T("\0");
+  GetModuleFileName(NULL, appDir, MAX_PATH);
+  *_tcsrchr(appDir, _TCHAR('\\')) = _TCHAR('\0');
+  std::wstring src_path = appDir;
+  src_path += L"\\";
+  src_path += file_name;
+  return CopyFileW(src_path.c_str(), dst_path.c_str(), FALSE);
+}
+
 int _tmain(int argc, _TCHAR* argv[]) {
-  _tprintf(_T("%s\n\n"), szGPL);
-
-  _tprintf(_T("%s\n\n"), szUsage);
-
   MONITOR_INFO_2 minfo = {0};
   LPTSTR szAction = NULL;
   int ret;
@@ -99,25 +124,44 @@ int _tmain(int argc, _TCHAR* argv[]) {
   minfo.pDLLName = (LPWSTR) _T("BYPortMonitor.dll");
 
   if (argc > 1 && _tcsicmp(argv[1], _T("-r")) == 0) {
-    // COPY FILE TO system
-    TCHAR appDir[MAX_PATH] = _T("\0");
-    GetModuleFileName(NULL, appDir, MAX_PATH);
-    *_tcsrchr(appDir, _TCHAR('\\')) = _TCHAR('\0');
-    std::wstring dllPath = std::wstring(appDir) + L"\\BYPortMonitor.dll";
-    std::wstring dstPath =
-        std::wstring(L"C:\\Windows\\System32") + L"\\BYPortMonitor.dll";
-    szAction = (LPWSTR)_T("CopyFile To System32");
-    ret = CopyFile(dllPath.c_str(), dstPath.c_str(), FALSE);
-    if (ret) {
-      dllPath = std::wstring(appDir) + L"\\BYPortMonitorUI.dll";
-      dstPath =
-          std::wstring(L"C:\\Windows\\System32") + L"\\BYPortMonitorUI.dll";
-      ret = CopyFile(dllPath.c_str(), dstPath.c_str(), FALSE);
-      if (ret) {
-        szAction = (LPWSTR) _T("AddMonitor");
-        ret = AddMonitor(NULL, 2, (LPBYTE)&minfo);
+    do 
+    {
+      ret = WriteAppDataDirToReg();
+      if (!ret) {
+        szAction = (LPWSTR) _T("WriteAppDataDirToReg");
+        break;
       }
-    }
+
+      ret = WriteInstallDirToReg();
+      if (!ret) {
+        szAction = (LPWSTR) _T("WriteAppDataDirToReg");
+        break;
+      }
+
+      ret = CopyFileToSystem32(L"BYPortMonitor.dll");
+      if (!ret) {
+        szAction = (LPWSTR) _T("CopyFileToSystem32");
+        break;
+      }
+      ret = CopyFileToSystem32(L"BYPortMonitorUI.dll");
+      if (!ret) {
+        szAction = (LPWSTR) _T("CopyFileToSystem32");
+        break;
+      }
+      ret = CopyFileToInstallDir(L"gsdll64.dll");
+      if (!ret) {
+        szAction = (LPWSTR) _T("CopyFileToInstallDir");
+        break;
+      }
+      ret = CopyFileToInstallDir(L"gswin64c.exe");
+      if (!ret) {
+        szAction = (LPWSTR) _T("CopyFileToInstallDir");
+        break;
+      }
+      szAction = (LPWSTR) _T("AddMonitor");
+      ret = AddMonitor(NULL, 2, (LPBYTE)&minfo);
+      break;
+    } while (true);
   } else if (argc > 1 && _tcsicmp(argv[1], _T("-d")) == 0) {
     szAction = (LPWSTR) _T("DeleteMonitor");
     ret = DeleteMonitor(NULL, NULL, minfo.pName);

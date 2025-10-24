@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "..\common\defs.h"
 #include "..\common\monutils.h"
 #include <VersionHelpers.h>
+#include <fstream>
+#include <vector>
 
 //-------------------------------------------------------------------------------------
 static BOOL EnablePrivilege(
@@ -822,15 +824,15 @@ BOOL CPort::WriteToFile(LPCVOID lpBuffer, DWORD cbBuffer, LPDWORD pcbWritten)
     }
   }
 
-  if (m_realPrinter != INVALID_HANDLE_VALUE) {
-    DWORD cbWritten = 0;
-    auto res = WritePrinter(m_realPrinter, (LPVOID)lpBuffer, cbBuffer, &cbWritten);
-    g_pLog->Info(this, L"CPort::WirtePrinter, result: %d, cbWritten %u",
-      res, cbWritten);
-  }
-  else {
-    g_pLog->Info(this, L"CPort::WirtePrinter, printer is invalid");
-  }
+  //if (m_realPrinter != INVALID_HANDLE_VALUE) {
+  //  DWORD cbWritten = 0;
+  //  auto res = WritePrinter(m_realPrinter, (LPVOID)lpBuffer, cbBuffer, &cbWritten);
+  //  g_pLog->Info(this, L"CPort::WirtePrinter, result: %d, cbWritten %u",
+  //    res, cbWritten);
+  //}
+  //else {
+  //  g_pLog->Info(this, L"CPort::WirtePrinter, printer is invalid");
+  //}
 
 	//pass buffer to the write thread
 	m_threadData.lpBuffer = lpBuffer;
@@ -982,16 +984,89 @@ BOOL CPort::EndJob()
 		CloseHandle(m_procInfo.hProcess);
 		CloseHandle(m_procInfo.hThread);
 	}
+	
+	//if (m_realPrinter != INVALID_HANDLE_VALUE) {
+	//	EndPagePrinter(m_realPrinter);
+	//	EndDocPrinter(m_realPrinter);
+	//	ClosePrinter(m_realPrinter);
+	//	m_realPrinter = INVALID_HANDLE_VALUE;
+	//	g_pLog->Info(this, L"CPort::ClosePrinter succeed");
+	//}
+	std::wstring pcl_path = m_szFileName;
+    pcl_path = pcl_path.substr(0, pcl_path.rfind(L'.'));
+    pcl_path += L".pcl";
+    g_pLog->Info(this, L"CPort::PCL path: %s", pcl_path.c_str());
 
+	std::wstring gs_path = GetInstallDirFromReg() + L"\\gswin64c.exe";
+    std::wstring cmd =
+        L"\"" + gs_path +
+        L"\" -dBATCH -dNOPAUSE -dSAFER -sDEVICE=pxlcolor -r600 -sOutputFile=\"";
+    cmd += pcl_path;
+    cmd += L"\" \"";
+    cmd += m_szFileName;
+    cmd += L"\"";
+    g_pLog->Info(this, L"CPort::cmd: %s", cmd.c_str());
+	// 
+	{
+      PROCESS_INFORMATION procinfo;
+      STARTUPINFOW si = {0};
+
+      ZeroMemory(&procinfo, sizeof(procinfo));
+
+      si.cb = sizeof(si);
+
+      // we're not going to give up in case of failure
+      if (m_hToken)
+        CreateProcessAsUserW(m_hToken, NULL, (LPWSTR)cmd.c_str(), NULL, NULL,
+                             FALSE, 0, NULL, NULL, &si, &procinfo);
+      else
+        CreateProcessW(NULL, (LPWSTR)cmd.c_str(), NULL, NULL, FALSE, 0, NULL,
+                       NULL, &si, &procinfo);
+
+	  if (procinfo.hProcess != INVALID_HANDLE_VALUE) {
+        WaitForSingleObject(procinfo.hProcess, INFINITE);
+        CloseHandle(procinfo.hProcess);
+        CloseHandle(procinfo.hThread);
+        g_pLog->Info(this, L"CPort::gs to pcl succeed: %s", pcl_path.c_str());
+      }
+     }
+
+     if (m_realPrinter != INVALID_HANDLE_VALUE) {
+       g_pLog->Info(this, L"CPort::write to real printer: %s",
+                    m_realPrinterName);
+       std::ifstream file(pcl_path, std::ios::in | std::ios::binary);
+       if (file) {
+         const size_t CHUNK_SIZE = 1024 * 1024;
+         std::vector<char> buffer(CHUNK_SIZE);
+         while (true) {
+           file.read(buffer.data(), CHUNK_SIZE);
+           std::streamsize bytesRead = file.gcount();
+           if (bytesRead <= 0) break;
+           DWORD cbWritten = 0;
+           auto res = WritePrinter(m_realPrinter, (LPVOID)buffer.data(),
+                                   bytesRead,
+                                   &cbWritten);
+           g_pLog->Info(this, L"CPort::WirtePrinter, result: % d, cbWritten %u",
+                        res, cbWritten);
+           if (!res || cbWritten != bytesRead) {
+             g_pLog->Error(this, L"CPort::WirtePrinter failed: %u",
+                           GetLastError());
+             break;
+           }
+         }
+       }
+
+	   EndPagePrinter(m_realPrinter);
+       EndDocPrinter(m_realPrinter);
+       ClosePrinter(m_realPrinter);
+       m_realPrinter = INVALID_HANDLE_VALUE;
+       g_pLog->Info(this, L"CPort::ClosePrinter succeed");
+
+     } else {
+       g_pLog->Info(this, L"CPort::real printer can not open: %s",
+                    m_realPrinterName);
+     }
 	*m_szFileName = L'\0';
-
-	if (m_realPrinter != INVALID_HANDLE_VALUE) {
-		EndPagePrinter(m_realPrinter);
-		EndDocPrinter(m_realPrinter);
-		ClosePrinter(m_realPrinter);
-		m_realPrinter = INVALID_HANDLE_VALUE;
-		g_pLog->Info(this, L"CPort::ClosePrinter succeed");
-	}
 
 	return TRUE;
 }

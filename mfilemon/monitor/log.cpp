@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <string.h>
 #include <stdarg.h>
 #include <tchar.h>
+#include "../common/monutils.h"
 //---------------------------------------------------------------------------
 
 static const unsigned short int BOM = 0xFEFF;
@@ -96,30 +97,22 @@ DWORD WINAPI CMfmLog::FlushThread(LPVOID pParam)
 }
 //---------------------------------------------------------------------------
 
-BOOL CMfmLog::CreateLogFile()
-{
-	TCHAR szPath[MAX_PATH] = { L'\0' };
-	GetSystemDirectoryW(szPath, LENGTHOF(szPath));
-	_tcscat(szPath, L"\\BYPrinter.log");
+BOOL CMfmLog::CreateLogFile() {
+  auto log_path = GetAppDataDirFromReg() + L"\\BYPrinter.log";
+  m_hLogFile = CreateFileW(log_path.c_str(), GENERIC_READ | GENERIC_WRITE,
+                           FILE_SHARE_READ, NULL, OPEN_ALWAYS, 0, NULL);
 
-	m_hLogFile = CreateFileW(szPath, GENERIC_READ | GENERIC_WRITE,
-		FILE_SHARE_READ, NULL, OPEN_ALWAYS, 0, NULL);
+  if (m_hLogFile == INVALID_HANDLE_VALUE) return FALSE;
 
-	if (m_hLogFile == INVALID_HANDLE_VALUE)
-		return FALSE;
+  if (GetLastError() == ERROR_ALREADY_EXISTS) {
+    SetFilePointer(m_hLogFile, 0, NULL, FILE_END);
+  } else {
+    DWORD wri;
+    WriteFile(m_hLogFile, &BOM, sizeof(BOM), &wri, NULL);
+    m_bFlushNeeded = TRUE;
+  }
 
-	if (GetLastError() == ERROR_ALREADY_EXISTS)
-	{
-		SetFilePointer(m_hLogFile, 0, NULL, FILE_END);
-	}
-	else
-	{
-		DWORD wri;
-		WriteFile(m_hLogFile, &BOM, sizeof(BOM), &wri, NULL);
-		m_bFlushNeeded = TRUE;
-	}
-
-	return TRUE;
+  return TRUE;
 }
 //---------------------------------------------------------------------------
 

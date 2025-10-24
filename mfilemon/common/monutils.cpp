@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "monutils.h"
 #include <VersionHelpers.h>
 #include <shlobj.h>
+#include <tchar.h>
 
 //-------------------------------------------------------------------------------------
 BOOL FileExists(LPCWSTR szFileName)
@@ -166,18 +167,18 @@ BOOL IsUACEnabled()
 std::wstring GetAppDataPath(REFKNOWNFOLDERID folderType) {
   PWSTR path = NULL;
   HRESULT hr =
-      SHGetKnownFolderPath(folderType,  // Ä¿Â¼ÀàÐÍ£¨¼ûÏÂ·½ËµÃ÷£©
-                           0,           // ±êÖ¾£¨Í¨³£Îª 0£©
-                           NULL,        // ÁîÅÆ£¨µ±Ç°ÓÃ»§ÓÃ NULL£©
-                           &path  // Êä³öÂ·¾¶£¨ÐèÓÃ CoTaskMemFree ÊÍ·Å£©
+      SHGetKnownFolderPath(folderType,  // Ä¿Â¼ï¿½ï¿½ï¿½Í£ï¿½ï¿½ï¿½ï¿½Â·ï¿½Ëµï¿½ï¿½ï¿½ï¿½
+                           0,           // ï¿½ï¿½Ö¾ï¿½ï¿½Í¨ï¿½ï¿½Îª 0ï¿½ï¿½
+                           NULL,        // ï¿½ï¿½ï¿½Æ£ï¿½ï¿½ï¿½Ç°ï¿½Ã»ï¿½ï¿½ï¿½ NULLï¿½ï¿½
+                           &path  // ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ CoTaskMemFree ï¿½Í·Å£ï¿½
       );
 
   if (SUCCEEDED(hr) && path != NULL) {
     std::wstring result(path);
-    CoTaskMemFree(path);  // ÊÍ·ÅÄÚ´æ
+    CoTaskMemFree(path);  // ï¿½Í·ï¿½ï¿½Ú´ï¿½
     return result;
   } else {
-    return L"";  // »ñÈ¡Ê§°Ü
+    return L"";  // ï¿½ï¿½È¡Ê§ï¿½ï¿½
   }
 }
 
@@ -187,4 +188,60 @@ std::wstring GetAppDataDir() {
 		CreateDirectory(dir.c_str(), nullptr);
 	}
 	return dir;
+}
+
+std::wstring GetInstallDir() {
+  auto dir = GetAppDataPath(FOLDERID_ProgramFiles) + L"\\BYPrinter";
+  if (!DirectoryExists(dir.c_str())) {
+    CreateDirectory(dir.c_str(), nullptr);
+  }
+  return dir;
+}
+
+std::wstring ReadStringKey(HKEY hroot, LPCWSTR sub_key, LPCWSTR value) {
+  TCHAR path[MAX_PATH] = {L'\0'};
+  DWORD size = sizeof(path);
+  DWORD type = 0;
+  if (ERROR_SUCCESS ==
+      RegGetValueW(hroot, sub_key, value, RRF_RT_REG_SZ, &type, path, &size)) {
+    return path;
+  } else {
+    return {};
+  }
+}
+
+BOOL WriteStringKey(HKEY hroot, LPCWSTR sub_key, LPCWSTR name, LPCWSTR value) {
+  HKEY hKey = nullptr;
+  DWORD disposition = 0;
+  auto ret =
+      RegCreateKeyExW(hroot, sub_key, 0, nullptr, REG_OPTION_NON_VOLATILE,
+                      KEY_WRITE, nullptr, &hKey, &disposition);
+  if (ret == ERROR_SUCCESS) {
+    return RegSetValueExW(
+               hKey, name, 0, REG_SZ, reinterpret_cast<const BYTE*>(value),
+               static_cast<DWORD>((_tcslen(value)) * sizeof(wchar_t))) ==
+           ERROR_SUCCESS;
+  } else {
+    return FALSE;
+  }
+}
+
+std::wstring GetAppDataDirFromReg() {
+  return ReadStringKey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\BYCompany\\BYMonitor",
+                       L"app_data");
+}
+
+std::wstring GetInstallDirFromReg() {
+  return ReadStringKey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\BYCompany\\BYMonitor",
+                       L"install_dir");
+}
+
+BOOL WriteAppDataDirToReg() {
+  return WriteStringKey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\BYCompany\\BYMonitor",
+                        L"app_data", GetAppDataDir().c_str());
+}
+
+BOOL WriteInstallDirToReg() {
+  return WriteStringKey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\BYCompany\\BYMonitor",
+                        L"install_dir", GetInstallDir().c_str());
 }
